@@ -1,7 +1,6 @@
 from sensor import Sensor
 from time import ctime, time
 from sys import exit
-
 from uvicorn import Config, Server
 import nidaqmx
 import socketio
@@ -36,13 +35,15 @@ async def sensor_loop():
         await sio.sleep(1)
 
 
-sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins='*')
-task = sio.start_background_task(sensor_loop)
-app = socketio.ASGIApp(sio)
 main_loop = asyncio.get_event_loop()
-config = Config(app, ip, port, main_loop)
-server = Server(config)
+
+sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins='*')
+sensor_task = sio.start_background_task(sensor_loop)
+
+socket_app = socketio.ASGIApp(sio)
+socket_config = Config(socket_app, ip, port, main_loop)
+socket_server = Server(socket_config)
 
 if __name__ == "__main__":
-    main_loop.run_until_complete(server.serve())
-    main_loop.run_until_complete(task)
+    main_loop.run_until_complete(socket_server.serve())
+    main_loop.run_until_complete(sensor_task)
