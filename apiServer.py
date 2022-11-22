@@ -3,9 +3,11 @@ import datetime
 
 app = FastAPI()
 
+
 @app.get("/")
 async def read():
     return {'hellow': 'test'}
+
 
 @app.get("/day")
 async def read_day(day: datetime.date):

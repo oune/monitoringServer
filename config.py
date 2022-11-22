@@ -23,11 +23,11 @@ def load(file_name: str):
     device_channel_name = config['model']['channels']
     sampling_rate = int(config['model']['sampling_rate'])
     samples_per_channel = int(config['model']['samples_per_channel'])
-    type = config['model']['type']
+    model_type = config['model']['type']
     ip = config['model']['ip']
     port = int(config['model']['port'])
 
-    return device_name, device_channel_name, sampling_rate, samples_per_channel, type, ip, port
+    return device_name, device_channel_name, sampling_rate, samples_per_channel, model_type, ip, port
 
 
 if __name__ == '__main__':
