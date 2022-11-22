@@ -35,15 +35,13 @@ async def sensor_loop():
         await sio.sleep(1)
 
 
-main_loop = asyncio.get_event_loop()
-
 sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins='*')
 sensor_task = sio.start_background_task(sensor_loop)
-
 socket_app = socketio.ASGIApp(sio)
-socket_config = Config(socket_app, ip, port, main_loop)
-socket_server = Server(socket_config)
 
 if __name__ == "__main__":
+    main_loop = asyncio.get_event_loop()
+    socket_config = Config(app=socket_app, host=ip, port=port, loop=main_loop)
+    socket_server = Server(socket_config)
     main_loop.run_until_complete(socket_server.serve())
     main_loop.run_until_complete(sensor_task)
