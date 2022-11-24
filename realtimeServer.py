@@ -2,19 +2,22 @@ from sensor import Sensor
 from time import ctime, time
 from sys import exit
 from uvicorn import Config, Server
+
+import configparser
 import nidaqmx
 import socketio
-import config
 import asyncio
 
-device_name, device_channel_name, sampling_rate, samples_per_channel, model_type, ip, port = config.load(
-    f'config.ini')
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 try:
-    sensor = Sensor.of(device_name,
-                       device_channel_name,
-                       sampling_rate,
-                       samples_per_channel * 2, model_type)
+    pass
+    # TODO 센서 로딩에서 config 파일로 부터 불러 오도록 수정
+    # sensor = Sensor.of(device_name,
+    #                    device_channel_name,
+    #                    sampling_rate,
+    #                    samples_per_channel * 2, model_type)
 except nidaqmx.errors.DaqError:
     print('잘못된 설정값이 입력 되었습니다. config.ini 파일을 올바르게 수정해 주세요.')
     exit()
@@ -41,7 +44,7 @@ socket_app = socketio.ASGIApp(sio)
 
 if __name__ == "__main__":
     main_loop = asyncio.get_event_loop()
-    socket_config = Config(app=socket_app, host=ip, port=port, loop=main_loop)
+    socket_config = Config(app=socket_app, host=config['server']['host_ip'], port=config['server']['port'], loop=main_loop)
     socket_server = Server(socket_config)
     main_loop.run_until_complete(socket_server.serve())
     main_loop.run_until_complete(sensor_task)
