@@ -30,12 +30,12 @@ except nidaqmx.errors.DaqError:
 
 async def sensor_loop():
     while True:
-        datas = await sensor_temp.read(config['sensor']['sampling_rate'], 30.0)
+        temp_data = await sensor_temp.read(int(config['sensor']['sampling_rate']), 30.0)
+        vib_data = await sensor_vib.read(int(config['sensor']['sampling_rate']), 30.0)
         now_time = ctime(time())
-        print(len(datas))
 
         await sio.sleep(1)
-        for idx in range(0, len(datas)):
+        for idx in range(0, len(temp_data)):
             await sio.emit('data', {'sensor_id': idx, 'time': now_time})
             await sio.sleep(1)
 
@@ -50,8 +50,14 @@ socket_app = socketio.ASGIApp(sio)
 
 if __name__ == "__main__":
     main_loop = asyncio.get_event_loop()
-    socket_config = Config(app=socket_app, host=config['server']['ip'], port=int(config['server']['port']),
+
+    socket_config = Config(app=socket_app,
+                           host=config['server']['ip'],
+                           port=int(config['server']['port']),
                            loop=main_loop)
     socket_server = Server(socket_config)
     main_loop.run_until_complete(socket_server.serve())
     main_loop.run_until_complete(sensor_task)
+
+
+
