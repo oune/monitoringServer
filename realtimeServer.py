@@ -1,4 +1,4 @@
-from sensor_temp import Sensor
+from sensor import Sensor
 from time import ctime, time
 from sys import exit
 from uvicorn import Config, Server
@@ -13,13 +13,15 @@ config.read('config.ini')
 
 try:
     sensor_temp = Sensor.of(config['temp']['device'],
-                            config['temp']['channel'],
-                            config['sensor']['sampling_rate'],
-                            config['sensor']['samples_per_channel'])
+                            config['temp']['channels'],
+                            int(config['sensor']['sampling_rate']),
+                            int(config['sensor']['samples_per_channel']),
+                            config['temp']['datatype'])
     sensor_vib = Sensor.of(config['vib']['device'],
-                           config['vib']['channel'],
-                           config['sensor']['sampling_rate'],
-                           config['sensor']['samples_per_channel'])
+                           config['vib']['channels'],
+                           int(config['sensor']['sampling_rate']),
+                           int(config['sensor']['samples_per_channel']),
+                           config['vib']['datatype'])
 
 except nidaqmx.errors.DaqError:
     print('잘못된 설정값이 입력 되었습니다. config.ini 파일을 올바르게 수정해 주세요.')
@@ -30,6 +32,7 @@ async def sensor_loop():
     while True:
         datas = await sensor_temp.read(config['sensor']['sampling_rate'], 30.0)
         now_time = ctime(time())
+        print(len(datas))
 
         await sio.sleep(1)
         for idx in range(0, len(datas)):
@@ -47,7 +50,7 @@ socket_app = socketio.ASGIApp(sio)
 
 if __name__ == "__main__":
     main_loop = asyncio.get_event_loop()
-    socket_config = Config(app=socket_app, host=config['server']['ip'], port=config['server']['port'],
+    socket_config = Config(app=socket_app, host=config['server']['ip'], port=int(config['server']['port']),
                            loop=main_loop)
     socket_server = Server(socket_config)
     main_loop.run_until_complete(socket_server.serve())

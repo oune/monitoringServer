@@ -25,7 +25,7 @@ class Sensor:
                                              samps_per_chan=samples_per_channel)
 
     @classmethod
-    def of(clc, device: str, channel: str, rate: int, samples_per_channel: int, type: str):
+    def of(cls, device: str, channel: str, rate: int, samples_per_channel: int, type: str):
         if type == 'vib':
             return Sensor.vib(device, channel,
                               rate, samples_per_channel)
@@ -34,15 +34,15 @@ class Sensor:
                                rate, samples_per_channel)
 
     @classmethod
-    def vib(clc, device: str, channel: str, rate: int, samples_per_channel: int):
-        instance = clc(device)
+    def vib(cls, device: str, channel: str, rate: int, samples_per_channel: int):
+        instance = cls(device)
         instance.add_vib_channel(channel)
         instance.set_timing(rate, samples_per_channel)
         return instance
 
     @classmethod
-    def temp(clc, device: str, channel: str, rate: int, samples_per_channel: int):
-        instance = clc(device)
+    def temp(cls, device: str, channel: str, rate: int, samples_per_channel: int):
+        instance = cls(device)
         instance.add_temp_channel(channel)
         instance.set_timing(rate, samples_per_channel)
         return instance
