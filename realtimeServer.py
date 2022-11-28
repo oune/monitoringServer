@@ -12,19 +12,19 @@ import asyncio
 config = configparser.ConfigParser()
 config.read('config.ini')
 
-samplingRate = int(config['sensor']['sampling_rate'])
-buffer_size = samplingRate * 8
-
 try:
+    temp_sampling_rate = int(config['temp']['sampling_rate'])
+    vib_sampling_rate = int(config['vib']['sampling_rate'])
+
     sensor_temp = Sensor.of(config['temp']['device'],
                             config['temp']['channels'],
-                            samplingRate,
-                            buffer_size,
+                            temp_sampling_rate,
+                            temp_sampling_rate * 2,
                             DataType.TEMP)
     sensor_vib = Sensor.of(config['vib']['device'],
                            config['vib']['channels'],
-                           samplingRate,
-                           buffer_size,
+                           vib_sampling_rate,
+                           vib_sampling_rate * 2,
                            DataType.VIB)
 
 except nidaqmx.errors.DaqError:
@@ -34,34 +34,25 @@ except nidaqmx.errors.DaqError:
 sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins='*')
 
 
-async def sensor_loop():
+async def sensor_loop_temp():
     while True:
         now_time = ctime(time())
-        temp_data = await sensor_temp.read(samplingRate)
-        vib_data = await sensor_vib.read(samplingRate)
-
-        # 리샘플링
-        # temp_data = [signal.resample(dataList, numberOfSamples) for dataList in temp_data]
-        # vib_data = [signal.resample(dataList, numberOfSamples) for dataList in vib_data]
-
-        print(len(temp_data[0]))
-        print(len(vib_data[0]))
+        data = await sensor_temp.read(temp_sampling_rate)
 
         await sio.sleep(1)
-        for idx in range(0, len(temp_data)):
-            await sio.emit('temp', {'sensor_id': idx, 'time': now_time, 'data': temp_data})
-            await sio.sleep(1)
-
-        for idx in range(0, len(temp_data)):
-            await sio.emit('vib', {'sensor_id': idx, 'time': now_time, 'data': vib_data})
-            await sio.sleep(1)
-
-        # TODO 모델 결과 전송 부분 구현
-        # wait sio.emit('model', {'time': now_time, 'mse': output_mse.item(),  'result': model_result})
-        # await sio.sleep(1)
+        await sio.emit('temp', {'time': now_time, 'data': len(data[0])})
 
 
-sensor_task = sio.start_background_task(sensor_loop)
+async def sensor_loop_vib():
+    while True:
+        now_time = ctime(time())
+        data = await sensor_vib.read(vib_sampling_rate)
+
+        await sio.sleep(1)
+        await sio.emit('vib', {'time': now_time, 'data': len(data[0])})
+
+sensor_task_vib = sio.start_background_task(sensor_loop_vib)
+sensor_task_temp = sio.start_background_task(sensor_loop_temp)
 socket_app = socketio.ASGIApp(sio)
 
 if __name__ == "__main__":
@@ -72,5 +63,7 @@ if __name__ == "__main__":
                            port=int(config['server']['port']),
                            loop=main_loop)
     socket_server = Server(socket_config)
-    # main_loop.run_until_complete(socket_server.serve())
-    main_loop.run_until_complete(sensor_task)
+
+    main_loop.run_until_complete(socket_server.serve())
+    main_loop.run_until_complete(sensor_task_vib)
+    main_loop.run_until_complete(sensor_task_temp)
