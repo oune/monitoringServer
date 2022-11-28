@@ -1,6 +1,6 @@
 from uvicorn import Config, Server
 from time import ctime, time
-from sensor import Sensor
+from sensor import Sensor, DataType
 from sys import exit
 from scipy import signal
 
@@ -20,12 +20,12 @@ try:
                             config['temp']['channels'],
                             samplingRate,
                             buffer_size,
-                            config['temp']['datatype'])
+                            DataType.TEMP)
     sensor_vib = Sensor.of(config['vib']['device'],
                            config['vib']['channels'],
                            samplingRate,
                            buffer_size,
-                           config['vib']['datatype'])
+                           DataType.VIB)
 
 except nidaqmx.errors.DaqError:
     print('잘못된 설정값이 입력 되었습니다. config.ini 파일을 올바르게 수정해 주세요.')
@@ -33,7 +33,6 @@ except nidaqmx.errors.DaqError:
 
 sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins='*')
 
-print(samplingRate)
 
 async def sensor_loop():
     while True:

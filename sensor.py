@@ -1,6 +1,12 @@
 import nidaqmx
 import nidaqmx.system
 from nidaqmx.constants import *
+from enum import Enum, auto
+
+
+class DataType(Enum):
+    VIB: int = auto()
+    TEMP: int = auto()
 
 
 class Sensor:
@@ -16,7 +22,8 @@ class Sensor:
     def add_temp_channel(self, channel: str):
         channel_name: str = self.device.name + "/" + channel
         self.task.ai_channels.add_ai_rtd_chan(channel_name, min_val=0.0, max_val=100.0, rtd_type=RTDType.PT_3750,
-                                              resistance_config=ResistanceConfiguration.THREE_WIRE, current_excit_source=ExcitationSource.INTERNAL, current_excit_val=0.00100)
+                                              resistance_config=ResistanceConfiguration.THREE_WIRE,
+                                              current_excit_source=ExcitationSource.INTERNAL, current_excit_val=0.00100)
 
     def set_timing(self, rate: int, samples_per_channel: int):
         self.task.timing.cfg_samp_clk_timing(rate=rate,
@@ -25,11 +32,11 @@ class Sensor:
                                              samps_per_chan=samples_per_channel)
 
     @classmethod
-    def of(cls, device: str, channel: str, rate: int, samples_per_channel: int, type: str):
-        if type == 'vib':
+    def of(cls, device: str, channel: str, rate: int, samples_per_channel: int, sensor_type: int):
+        if sensor_type == DataType.VIB:
             return Sensor.vib(device, channel,
                               rate, samples_per_channel)
-        elif type == 'temp':
+        elif sensor_type == DataType.TEMP:
             return Sensor.temp(device, channel,
                                rate, samples_per_channel)
 
