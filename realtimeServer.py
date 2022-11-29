@@ -2,6 +2,7 @@ from uvicorn import Config, Server
 from time import ctime, time
 from sensor import Sensor, DataType
 from sys import exit
+from socketio.asyncio_server import AsyncServer
 from scipy import signal
 
 import configparser
@@ -24,7 +25,7 @@ try:
     sensor_vib = Sensor.of(config['vib']['device'],
                            config['vib']['channels'],
                            vib_sampling_rate,
-                           vib_sampling_rate * 2,
+                           vib_sampling_rate * 4,
                            DataType.VIB)
 
 except nidaqmx.errors.DaqError:
@@ -34,26 +35,36 @@ except nidaqmx.errors.DaqError:
 sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins='*')
 
 
+async def try_read(server: AsyncServer, sensor: Sensor, sampling_rate: int, event_name: str):
+    now_time = ctime(time())
+    data = await sensor.read(sampling_rate)
+
+    await server.sleep(1)
+    await server.emit(event_name, {'time': now_time, 'data': data})
+
+
+async def read(server: AsyncServer, sensor: Sensor, sampling_rate: int, event_name: str):
+    try:
+        await try_read(server, sensor, sampling_rate, event_name)
+    except Exception as e:
+        print(e)
+        await server.sleep(1)
+        await server.emit('error', '!')
+
+
 async def sensor_loop_temp():
     while True:
-        now_time = ctime(time())
-        data = await sensor_temp.read(temp_sampling_rate)
-
-        await sio.sleep(1)
-        await sio.emit('temp', {'time': now_time, 'data': len(data[0])})
+        await read(sio, sensor_temp, temp_sampling_rate, 'temp')
 
 
 async def sensor_loop_vib():
     while True:
-        now_time = ctime(time())
-        data = await sensor_vib.read(vib_sampling_rate)
+        await read(sio, sensor_vib, vib_sampling_rate, 'vib')
 
-        await sio.sleep(1)
-        await sio.emit('vib', {'time': now_time, 'data': len(data[0])})
 
+socket_app = socketio.ASGIApp(sio)
 sensor_task_vib = sio.start_background_task(sensor_loop_vib)
 sensor_task_temp = sio.start_background_task(sensor_loop_temp)
-socket_app = socketio.ASGIApp(sio)
 
 if __name__ == "__main__":
     main_loop = asyncio.get_event_loop()
