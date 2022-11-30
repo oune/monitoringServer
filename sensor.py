@@ -47,6 +47,7 @@ class Sensor:
         instance = cls()
         instance.add_vib_channel(channel)
         instance.set_timing(rate, samples_per_channel)
+        instance.set_sample_count(rate)
         return instance
 
     @classmethod
@@ -54,6 +55,7 @@ class Sensor:
         instance = cls()
         instance.add_temp_channel(channel)
         instance.set_timing(rate, samples_per_channel)
+        instance.set_sample_count(rate)
         return instance
 
     @classmethod
