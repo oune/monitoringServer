@@ -7,6 +7,7 @@ from fastapi import FastAPI
 import socketio
 import nidaqmx
 import asyncio
+import datetime
 
 sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins='*')
 
@@ -62,16 +63,20 @@ async def sensor_loop_temp():
 app = FastAPI()
 
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
+@app.get("/month/{date}")
+def get_stat_month(date: datetime.date):
+    return {'date': date}
+
+
+@app.get("/{date}")
+def get_stat_day(date: datetime.date):
+    return {'date': date}
 
 
 if __name__ == "__main__":
     conf = ConfigParser()
     conf.read('config.ini')
     sensor_vib, sensor_temp = sensor_load(conf)
-
     socket_app = socketio.ASGIApp(sio, app)
     sensor_task_vib = sio.start_background_task(sensor_loop_vib)
     sensor_task_temp = sio.start_background_task(sensor_loop_temp)
