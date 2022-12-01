@@ -1,10 +1,10 @@
 from asyncio import AbstractEventLoop
-
 from uvicorn import Config, Server
 from sensor import Sensor
 from sys import exit
 from configparser import ConfigParser
 from fastapi import FastAPI
+from time import ctime, time
 
 import socketio
 import nidaqmx
@@ -55,20 +55,34 @@ def server_load(_app: socketio.asgi.ASGIApp, _config: ConfigParser, loop: Abstra
     return Server(config)
 
 
-async def sensor_loop():
-    while True:
-        await sensor_vib.read(sio, 'vib')
-        await sensor_vib.read(sio, 'temp')
+async def try_read(sensor: Sensor, event_name: str, data_tag_names: list):
+    now_time = ctime(time())
+    data_list = sensor.task.read(number_of_samples_per_channel=sensor.read_count, timeout=10.0)
+    message = {
+        'time': now_time
+    }
+    for idx, data in enumerate(data_list):
+        message[data_tag_names[idx]] = data
+
+    await sio.sleep(1)
+    await sio.emit(event_name, message)
+
+
+async def read(sensor: Sensor, event_name: str, data_tag_names: list):
+    try:
+        await try_read(sensor, event_name, data_tag_names)
+    except nidaqmx.errors.DaqReadError as e:
+        pass
 
 
 async def sensor_loop_vib():
     while True:
-        await sensor_vib.read(sio, 'vib')
+        await read(sensor_vib, 'vib', ['machine2_left', 'machine2_right', 'machine1_left', 'machine1_right'])
 
 
 async def sensor_loop_temp():
     while True:
-        await sensor_temp.read(sio, 'temp')
+        await read(sensor_temp, 'temp', ['machine2', 'machine1'])
 
 
 app = FastAPI()

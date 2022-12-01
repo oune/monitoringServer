@@ -78,4 +78,3 @@ class Sensor:
             await self.try_read(server, event_name)
         except nidaqmx.errors.DaqReadError as e:
             pass
-
