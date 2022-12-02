@@ -12,9 +12,9 @@ class Machine:
             self.clear_batch()
 
     def is_batch(self):
-        return len(self.vib_left) > self.batch_size \
-               and len(self.temp) > self.batch_size \
-               and len(self.vib_right) > self.batch_size
+        return len(self.vib_left) >= self.batch_size \
+               and len(self.temp) >= self.batch_size \
+               and len(self.vib_right) >= self.batch_size
 
     def clear_batch(self):
         del self.vib_left[:self.batch_size]
@@ -44,8 +44,8 @@ class DataController:
 
     def add_vib(self, message: dict):
         self.machine1.add_vib([message['machine1_left'], message['machine1_right']])
-        self.machine1.add_vib([message['machine2_left'], message['machine2_right']])
+        self.machine2.add_vib([message['machine2_left'], message['machine2_right']])
 
     def add_temp(self, message: dict):
         self.machine1.add_temp(message['machine1'])
-        self.machine1.add_temp(message['machine2'])
+        self.machine2.add_temp(message['machine2'])

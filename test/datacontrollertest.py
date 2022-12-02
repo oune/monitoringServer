@@ -1,4 +1,4 @@
-import unittest
+﻿import unittest
 from dataController import DataController
 
 
@@ -21,7 +21,7 @@ class MyTestCase(unittest.TestCase):
         controller.add_vib(message)
         self.assertEqual(controller.machine1.vib_left, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
         controller.add_vib(message)
-        self.assertEqual(controller.machine1.vib_left, [])
+        self.assertEqual(controller.machine1.vib_left, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
 
 
 if __name__ == '__main__':
