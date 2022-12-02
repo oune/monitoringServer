@@ -41,3 +41,11 @@ class DataController:
     def __init__(self, model_req, batch_size):
         self.machine1 = Machine(model_req, batch_size)
         self.machine2 = Machine(model_req, batch_size)
+
+    def add_vib(self, message: dict):
+        self.machine1.add_vib([message['machine1_left'], message['machine1_right']])
+        self.machine1.add_vib([message['machine2_left'], message['machine2_right']])
+
+    def add_temp(self, message:dict):
+        self.machine1.add_temp(message['machine1'])
+        self.machine1.add_temp(message['machine2'])
