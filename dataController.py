@@ -46,6 +46,6 @@ class DataController:
         self.machine1.add_vib([message['machine1_left'], message['machine1_right']])
         self.machine1.add_vib([message['machine2_left'], message['machine2_right']])
 
-    def add_temp(self, message:dict):
+    def add_temp(self, message: dict):
         self.machine1.add_temp(message['machine1'])
         self.machine1.add_temp(message['machine2'])
