@@ -11,8 +11,6 @@ import nidaqmx
 import asyncio
 import datetime
 
-sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins='*')
-
 
 def sensor_config_load(config: ConfigParser):
     sampling_rate = int(config['sensor']['rate'])
@@ -53,6 +51,9 @@ def server_load(_app: socketio.asgi.ASGIApp, _config: ConfigParser, loop: Abstra
                     port=int(_config['server']['port']),
                     loop=loop)
     return Server(config)
+
+
+sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins='*')
 
 
 async def try_read(sensor: Sensor, event_name: str, data_tag_names: list):
