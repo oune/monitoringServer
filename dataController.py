@@ -9,11 +9,17 @@ class Machine:
     def trigger(self):
         if self.is_batch():
             self.callback()
+            self.clear_batch()
 
     def is_batch(self):
         return len(self.vib_left) > self.batch_size \
                and len(self.temp) > self.batch_size \
                and len(self.vib_right) > self.batch_size
+
+    def clear_batch(self):
+        del self.vib_left[:self.batch_size]
+        del self.vib_right[:self.batch_size]
+        del self.temp[:self.batch_size]
 
     def add_vib_left(self, data):
         self.vib_left.extend(data)
@@ -32,9 +38,6 @@ class Machine:
 
 
 class DataController:
-    def __init__(self, batch_size):
-        def model_req():
-            pass
-
+    def __init__(self, model_req, batch_size):
         self.machine1 = Machine(model_req, batch_size)
         self.machine2 = Machine(model_req, batch_size)
