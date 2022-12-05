@@ -76,5 +76,5 @@ class Sensor:
     async def read(self, server: AsyncServer, event_name: str):
         try:
             await self.try_read(server, event_name)
-        except nidaqmx.errors.DaqReadError as e:
+        except nidaqmx.errors.DaqReadError:
             pass
