@@ -2,6 +2,7 @@ from uvicorn import Config, Server
 from fastapi import FastAPI
 from time import ctime, time
 
+import random
 import socketio
 import asyncio
 import datetime
@@ -9,26 +10,31 @@ import datetime
 sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins='*')
 app = FastAPI()
 
+data_len = 10
+
 
 async def sensor_loop_vib():
+    print('vib loop start')
     while True:
         now_time = ctime(time())
-        print('vib')
-        message = {
-            'time': now_time  # TODO 내용추가
-        }
+        message = {'time': now_time,
+                   'machine2_left': [random.random() for i in range(0, data_len)],
+                   'machine2_right': [random.random() for i in range(0, data_len)],
+                   'machine1_left': [random.random() for i in range(0, data_len)],
+                   'machine1_right': [random.random() for i in range(0, data_len)]
+                   }
 
         await sio.sleep(1)
         await sio.emit('vib', message)
 
 
 async def sensor_loop_temp():
+    print('temp loop start')
     while True:
         now_time = ctime(time())
-        print('temp')
-        message = {
-            'time': now_time  # TODO 내용추가
-        }
+        message = {'time': now_time,
+                   'machine2': [random.random() * 30 + 20 for i in range(0, data_len)],
+                   'machine1': [random.random() * 30 + 20 for i in range(0, data_len)]}
 
         await sio.sleep(1)
         await sio.emit('temp', message)
