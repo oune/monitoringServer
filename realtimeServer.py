@@ -5,11 +5,19 @@ from sys import exit
 from configparser import ConfigParser
 from fastapi import FastAPI
 from time import ctime, time
+from dataController import DataController
 
 import socketio
 import nidaqmx
 import asyncio
 import datetime
+
+
+def model_req():
+    pass
+
+
+dc = DataController(model_req, 10)
 
 
 def sensor_config_load(config: ConfigParser):
@@ -64,6 +72,11 @@ async def try_read(sensor: Sensor, event_name: str, data_tag_names: list):
     }
     for idx, data in enumerate(data_list):
         message[data_tag_names[idx]] = data
+
+    if event_name == 'vib':
+        dc.add_vib(message)
+    elif event_name == 'temp':
+        dc.add_temp(message)
 
     await sio.sleep(1)
     await sio.emit(event_name, message)
