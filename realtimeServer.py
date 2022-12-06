@@ -1,11 +1,11 @@
 from asyncio import AbstractEventLoop
 from typing import List
 
-from uvicorn import Config, Server
+from uvicorn import *
 from sensor import Sensor
 from sys import exit
 from configparser import ConfigParser
-from fastapi import FastAPI
+from fastapi import *
 from time import ctime, time
 from dataController import DataController
 

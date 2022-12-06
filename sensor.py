@@ -2,7 +2,7 @@ import nidaqmx
 import nidaqmx.system
 from nidaqmx.constants import *
 from enum import Enum, auto
-from socketio.asyncio_server import AsyncServer
+from socketio.asyncio_server import *
 from time import ctime, time
 
 
