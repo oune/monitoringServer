@@ -1,5 +1,8 @@
+from typing import Callable, List
+
+
 class Machine:
-    def __init__(self, callback, batch_size: int = 10):
+    def __init__(self, callback: Callable[[List[float], List[float], List[float]], None], batch_size: int = 10):
         self.vib_left = []
         self.vib_right = []
         self.temp = []
@@ -8,7 +11,7 @@ class Machine:
 
     def trigger(self):
         if self.is_batch():
-            self.callback()
+            self.callback(self.vib_left, self.vib_right, self.temp)
             self.clear_batch()
 
     def is_batch(self):
@@ -38,7 +41,7 @@ class Machine:
 
 
 class DataController:
-    def __init__(self, model_req, batch_size):
+    def __init__(self, model_req: Callable[[List[float], List[float], List[float]], None], batch_size):
         self.machine1 = Machine(model_req, batch_size)
         self.machine2 = Machine(model_req, batch_size)
 

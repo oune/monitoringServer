@@ -1,4 +1,6 @@
 from asyncio import AbstractEventLoop
+from typing import List
+
 from uvicorn import Config, Server
 from sensor import Sensor
 from sys import exit
@@ -13,7 +15,7 @@ import asyncio
 import datetime
 
 
-def model_req():
+def model_req(left: List[float], right: List[float], temp: List[float]):
     pass
 
 
@@ -85,7 +87,7 @@ async def try_read(sensor: Sensor, event_name: str, data_tag_names: list):
 async def read(sensor: Sensor, event_name: str, data_tag_names: list):
     try:
         await try_read(sensor, event_name, data_tag_names)
-    except nidaqmx.errors.DaqReadError as e:
+    except nidaqmx.errors.DaqReadError:
         pass
 
 
