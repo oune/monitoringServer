@@ -158,25 +158,26 @@ class AeModel:
         res = self.model(data.to(self.args.device))
         return res
 
-    def get_score(self, model_res, anomaly_calculator: AnomalyCalculator):
+    def get_score(self, predict_values):
         loss_list = []
         with torch.no_grad():
-            predict_values = model_res
             loss = F.l1_loss(predict_values[0], predict_values[1], reduce=False)
             loss = loss.mean(dim=1).cpu().numpy()
             loss_list.append(loss)
 
         loss_list = np.concatenate(loss_list, axis=0)
-        ans_score = anomaly_calculator(loss_list).mean()
+        ans_score = self.anomaly_calculator(loss_list).mean()
         return ans_score
 
 
-list1: List[float] = [0.001 for _ in range(0, 3 * 128)]
-list2: List[float] = [0.002 for _ in range(0, 3 * 128)]
-list3: List[float] = [0.003 for _ in range(0, 3 * 128)]
+if __name__ == "__main__":
+    list1: List[float] = [0.001 for _ in range(0, 3 * 128)]
+    list2: List[float] = [0.002 for _ in range(0, 3 * 128)]
+    list3: List[float] = [0.003 for _ in range(0, 3 * 128)]
 
-init_data_path = '/content/drive/Othercomputers/?귗뀬 ?귗뀳?먤뀽?뉌뀸???뉌뀸?뚡뀿?ⓤ꼹???뗡뀫?멜꼶??넰?뚡뀫?솽꼪??ae_model.data'
-ac = get_socre_calc(init_data_path)
-model_res = inference_model(list1, list2, list3)
-score = get_score(model_res, ac)
-print(score)
+    model_path = 'model8.pth'
+    init_data_path = 'init_data_path.data'
+    model = AeModel(model_path, init_data_path)
+    model_res = model.inference_model(list1, list2, list3)
+    score = model.get_score(model_res)
+    print(score)
