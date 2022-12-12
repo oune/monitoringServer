@@ -161,7 +161,7 @@ class AeModel:
     def get_score(self, predict_values):
         loss_list = []
         with torch.no_grad():
-            loss = F.l1_loss(predict_values[0], predict_values[1], reduce=False)
+            loss = F.l1_loss(predict_values[0], predict_values[1], reduction='none')
             loss = loss.mean(dim=1).cpu().numpy()
             loss_list.append(loss)
 
