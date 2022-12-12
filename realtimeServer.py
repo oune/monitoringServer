@@ -1,22 +1,30 @@
 from asyncio import AbstractEventLoop
 from typing import List
 
-from uvicorn import *
+from uvicorn import Config, Server
 from sensor import Sensor
 from sys import exit
 from configparser import ConfigParser
-from fastapi import *
+from fastapi import FastAPI
 from time import ctime, time
 from dataController import DataController
+from model import AeModel
 
-import socketio
 import nidaqmx
 import asyncio
 import datetime
+import socketio
+
+model_path = 'model8.pth'
+init_data_path = 'init_data_path.data'
+model = AeModel(model_path, init_data_path)
 
 
 def model_req(left: List[float], right: List[float], temp: List[float]):
     pass
+    # model_res = model.inference_model(left, right, temp)
+    # score = model.get_score(model_res)
+    # print(score)
 
 
 dc = DataController(model_req, 10)
@@ -55,7 +63,7 @@ def sensor_load(config: ConfigParser):
         exit()
 
 
-def server_load(_app: socketio.asgi.ASGIApp, _config: ConfigParser, loop: AbstractEventLoop):
+def server_load(_app, _config: ConfigParser, loop: AbstractEventLoop):
     config = Config(app=_app,
                     host=_config['server']['ip'],
                     port=int(_config['server']['port']),

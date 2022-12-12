@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import os
-from tqdm.notebook import tqdm
 import torch
 from torch import nn
 from torch.nn import functional as F
@@ -110,7 +108,7 @@ class AnomalyCalculator:
 
 
 class AeModel:
-    def __init__(self, model_path: str, calc_path: str):
+    def __init__(self, model_prt_path: str, calc_path: str):
         self.args = easydict.EasyDict({
             "batch_size": 128,
             "device": torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu'),
@@ -126,10 +124,10 @@ class AeModel:
         self.model = LSTMAutoEncoder(input_dim=self.args.input_size, latent_dim=self.args.latent_size,
                                      window_size=self.args.window_size,
                                      num_layers=self.args.num_layers)
-        self.model.load_state_dict(torch.load(model_path, map_location=self.args.device))
+        self.model.load_state_dict(torch.load(model_prt_path, map_location=self.args.device))
         self.model.to(self.args.device)
         self.model.eval()
-        with open(init_data_path, "rb") as fr:
+        with open(calc_path, "rb") as fr:
             init_data = pickle.load(fr)
         self.anomaly_calculator = AnomalyCalculator(init_data['mean'], init_data['std'])
 

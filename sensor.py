@@ -2,7 +2,6 @@ import nidaqmx
 import nidaqmx.system
 from nidaqmx.constants import *
 from enum import Enum, auto
-from socketio.asyncio_server import *
 from time import ctime, time
 
 
@@ -66,14 +65,14 @@ class Sensor:
         instance.set_timing(rate, buffer_size)
         return instance
 
-    async def try_read(self, server: AsyncServer, event_name: str):
+    async def try_read(self, server, event_name: str):
         now_time = ctime(time())
         data = self.task.read(number_of_samples_per_channel=self.read_count, timeout=10.0)
 
         await server.sleep(1)
         await server.emit(event_name, {'time': now_time, 'data': data})
 
-    async def read(self, server: AsyncServer, event_name: str):
+    async def read(self, server, event_name: str):
         try:
             await self.try_read(server, event_name)
         except nidaqmx.errors.DaqReadError:
