@@ -20,8 +20,7 @@ class Encoder(nn.Module):
 
     def forward(self, x):
         outputs, (hidden, cell) = self.lstm(x)  # out: tensor of shape (batch_size, seq_length, hidden_size)
-
-        return (hidden, cell)
+        return hidden, cell
 
 
 class Decoder(nn.Module):
@@ -133,20 +132,6 @@ class AeModel:
         with open(init_data_path, "rb") as fr:
             init_data = pickle.load(fr)
         self.anomaly_calculator = AnomalyCalculator(init_data['mean'], init_data['std'])
-
-    def get_loss_list(self, args, model, test_loader):
-        test_iterator = tqdm(enumerate(test_loader), total=len(test_loader), desc="testing")
-        loss_list = []
-
-        with torch.no_grad():
-            for i, batch_data in test_iterator:
-                batch_data = batch_data.to(args.device)
-                predict_values = model(batch_data)
-                loss = F.l1_loss(predict_values[0], predict_values[1], reduce=False)
-                loss = loss.mean(dim=1).cpu().numpy()
-                loss_list.append(loss)
-        loss_list = np.concatenate(loss_list, axis=0)
-        return loss_list
 
     def inference_model(self, left: List[float], right: List[float], temp: List[float]):
         np_left = np.array(left)
