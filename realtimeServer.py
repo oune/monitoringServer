@@ -20,12 +20,16 @@ init_data_path = 'init_data_path.data'
 model = AeModel(model_path, init_data_path)
 
 
-async def model_req(left: List[float], right: List[float], temp: List[float]):
+async def model_req(left: List[float], right: List[float], temp: List[float], name: str):
     try:
         model_res = await model.inference_model(left, right, temp)
         score = await model.get_score(model_res)
         print(ctime(time()), score)
-        await sio.emit('model', score)
+        message = {
+            'name': name,
+            'score': score,
+        }
+        await sio.emit('model', message)
     except Exception as e:
         print(e)
 
