@@ -3,7 +3,7 @@ from dataController import DataController
 
 
 class MyTestCase(unittest.TestCase):
-    def test_add(self):
+    async def test_add(self):
         def callback():
             pass
 
@@ -16,11 +16,11 @@ class MyTestCase(unittest.TestCase):
             'machine1_right': [1, 1, 1, 1, 1],
         }
         self.assertEqual(controller.machine1.vib_left, [])
-        controller.add_vib(message)
+        await controller.add_vib(message)
         self.assertEqual(controller.machine1.vib_left, [1, 1, 1, 1, 1])
-        controller.add_vib(message)
+        await controller.add_vib(message)
         self.assertEqual(controller.machine1.vib_left, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
-        controller.add_vib(message)
+        await controller.add_vib(message)
         self.assertEqual(controller.machine1.vib_left, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
 
 

@@ -131,7 +131,7 @@ class AeModel:
             init_data = pickle.load(fr)
         self.anomaly_calculator = AnomalyCalculator(init_data['mean'], init_data['std'])
 
-    def inference_model(self, left: List[float], right: List[float], temp: List[float]):
+    async def inference_model(self, left: List[float], right: List[float], temp: List[float]):
         np_left = np.array(left)
         np_right = np.array(right)
         np_temp = np.array(temp)
@@ -141,7 +141,7 @@ class AeModel:
         res = self.model(data.to(self.args.device))
         return res
 
-    def get_score(self, predict_values):
+    async def get_score(self, predict_values):
         loss_list = []
         with torch.no_grad():
             loss = F.l1_loss(predict_values[0], predict_values[1], reduction='none')

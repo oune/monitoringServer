@@ -20,14 +20,17 @@ init_data_path = 'init_data_path.data'
 model = AeModel(model_path, init_data_path)
 
 
-def model_req(left: List[float], right: List[float], temp: List[float]):
-    pass
-    # model_res = model.inference_model(left, right, temp)
-    # score = model.get_score(model_res)
-    # print(score)
+async def model_req(left: List[float], right: List[float], temp: List[float]):
+    try:
+        model_res = await model.inference_model(left, right, temp)
+        score = await model.get_score(model_res)
+        print(ctime(time()), score)
+        await sio.emit('model', score)
+    except Exception as e:
+        print(e)
 
 
-dc = DataController(model_req, 10)
+dc = DataController(model_req, 384)
 
 
 def sensor_config_load(config: ConfigParser):
@@ -84,9 +87,9 @@ async def try_read(sensor: Sensor, event_name: str, data_tag_names: list):
         message[data_tag_names[idx]] = data
 
     if event_name == 'vib':
-        dc.add_vib(message)
+        await dc.add_vib(message)
     elif event_name == 'temp':
-        dc.add_temp(message)
+        await dc.add_temp(message)
 
     await sio.sleep(1)
     await sio.emit(event_name, message)
