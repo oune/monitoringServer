@@ -24,7 +24,6 @@ async def model_req(left: List[float], right: List[float], temp: List[float], na
     try:
         model_res = await model.inference_model(left, right, temp)
         score = await model.get_score(model_res)
-        print(ctime(time()), score)
         message = {
             'name': name,
             'score': score,
