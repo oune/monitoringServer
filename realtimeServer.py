@@ -15,8 +15,8 @@ import asyncio
 import datetime
 import socketio
 
-model_path = 'model8.pth'
-init_data_path = 'init_data_path.data'
+model_path = 'resource/model8.pth'
+init_data_path = 'resource/init_data_path.data'
 model = AeModel(model_path, init_data_path)
 
 

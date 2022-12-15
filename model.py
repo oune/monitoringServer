@@ -158,8 +158,8 @@ if __name__ == "__main__":
     list2: List[float] = [0.002 for _ in range(0, 3 * 128)]
     list3: List[float] = [0.003 for _ in range(0, 3 * 128)]
 
-    model_path = 'model8.pth'
-    init_data_path = 'init_data_path.data'
+    model_path = 'resource/model8.pth'
+    init_data_path = 'resource/init_data_path.data'
     model = AeModel(model_path, init_data_path)
     model_res = model.inference_model(list1, list2, list3)
     score = model.get_score(model_res)
