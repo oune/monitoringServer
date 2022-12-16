@@ -1,8 +1,9 @@
-from pymongo import MongoClient
 
-client = MongoClient(host='localhost', port=27017)
+# sql lite 사용
 
-db = client['sensors']
-db.datas.insert_one({'test': 'hello'})
+class Database:
+    def __init__(self):
+        pass
 
-print(db.datas)
+    def show(self):
+        pass
