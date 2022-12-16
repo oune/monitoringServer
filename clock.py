@@ -1,25 +1,36 @@
 from time import time, localtime, strftime
 
 
-def get_w_day():
-    return localtime(time()).tm_wday
+def get_time() -> str:
+    return strftime('%Y%m%d%H', localtime(time()))
 
 
-def get_time():
-    return strftime('%H:%M:%S', localtime(time()))
+def day(time_str: str) -> str:
+    return time_str[:-2]
 
 
-def get_date():
-    return strftime('%Y%m%d', localtime(time()))
-
-
-class Time:
+class TimeController:
     def __init__(self):
-        self.pre = get_w_day()
+        self.pre = get_time()
+
+    def update(self):
+        self.pre = get_time()
 
     def is_day_change(self):
-        wday = get_w_day()
-        ans = wday != self.pre
-        self.pre = wday
-        return ans
+        now = day(get_time())
+        is_day_changed = now != day(self.pre)
+        self.update()
 
+        return is_day_changed
+
+    def is_hour_change(self):
+        now = get_time()
+        is_hour_changed = self.pre != now
+        self.update()
+
+        return is_hour_changed
+
+
+if __name__ == "__main__":
+    print(day(get_time()))
+    print(get_time()[:-2])
