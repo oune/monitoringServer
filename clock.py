@@ -29,8 +29,3 @@ class TimeController:
         self.update()
 
         return is_hour_changed
-
-
-if __name__ == "__main__":
-    print(day(get_time()))
-    print(get_time()[:-2])
