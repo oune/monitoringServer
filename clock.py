@@ -5,6 +5,10 @@ def get_time() -> str:
     return strftime('%Y%m%d%H', localtime(time()))
 
 
+def get_day() -> str:
+    return day(get_time())
+
+
 def day(time_str: str) -> str:
     return time_str[:-2]
 
