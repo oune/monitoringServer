@@ -1,7 +1,6 @@
 import sqlite3
+from datetime import datetime
 
-
-# sql lite 사용
 
 class Database:
     def __init__(self, path: str):
@@ -27,7 +26,7 @@ class Database:
             conn.close()
 
     def check_data_table(self):
-        def try_check_data_table(conn):
+        def query(conn):
             cursor = conn.cursor()
             cursor.execute("SELECT count(*) FROM sqlite_master WHERE type='table' and name='data'")
             res = cursor.fetchone()[0]
@@ -36,20 +35,40 @@ class Database:
             else:
                 return False
 
-        return self.execute(try_check_data_table)
+        return self.execute(query)
 
     def init_table(self):
-        def try_init_table(conn):
-            conn.execute("CREATE TABLE data(id INTEGER PRIMARY KEY AUTOINCREMENT, time TEXT, value REAL)")
+        def query(conn):
+            conn.execute("CREATE TABLE data(id INTEGER PRIMARY KEY AUTOINCREMENT, time TIMESTAMP, value REAL)")
 
-        self.execute(try_init_table)
+        self.execute(query)
 
-    def save(self, data: float):
-        def try_save(conn):
+    def get_all(self):
+        def query(conn):
             cur = conn.cursor()
-            cur.execute('insert into data(time, value) values (?, ?)', ('2022-12-01 00:00:00.000', data))
+            cur.execute('select * from data')
+            print(cur.fetchall())
 
-        self.execute(try_save)
+        self.execute(query)
+
+    def get_by_one_day(self, date):
+        def query(conn):
+            cur = conn.cursor()
+            cur.execute('SELECT * FROM data WHERE DATE(time) == ?', (date, ))
+            print(cur.fetchall())
+
+        self.execute(query)
+
+    def save(self, time, data: float):
+        def query(conn):
+            cur = conn.cursor()
+            cur.execute('insert into data(time, value) values (?, ?)', (time, data))
+
+        self.execute(query)
 
 
 db = Database("db/machine_1.db")
+# db.save(datetime.now(), 3.22)
+db.get_all()
+print()
+db.get_by_one_day('2022-12-19')
