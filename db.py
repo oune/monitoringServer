@@ -46,18 +46,26 @@ class Database:
     def get_all(self):
         def query(conn):
             cur = conn.cursor()
-            cur.execute('select * from data')
-            print(cur.fetchall())
+            cur.execute('select time, value from data order by time')
+            return cur.fetchall()
 
-        self.execute(query)
+        return self.execute(query)
 
     def get_by_one_day(self, date):
         def query(conn):
             cur = conn.cursor()
-            cur.execute('SELECT * FROM data WHERE DATE(time) == ?', (date, ))
-            print(cur.fetchall())
+            cur.execute('SELECT time, value FROM data WHERE DATE(time) == ? order by time', (date, ))
+            return cur.fetchall()
 
-        self.execute(query)
+        return self.execute(query)
+
+    def get_by_duration(self, start, end):
+        def query(conn):
+            cur = conn.cursor()
+            cur.execute('SELECT time, value FROM data WHERE DATE(time) >= ? and DATE(time) <= ? order by time', (start, end))
+            return cur.fetchall()
+
+        return self.execute(query)
 
     def save(self, time, data: float):
         def query(conn):
@@ -67,8 +75,4 @@ class Database:
         self.execute(query)
 
 
-db = Database("db/machine_1.db")
-# db.save(datetime.now(), 3.22)
-db.get_all()
-print()
-db.get_by_one_day('2022-12-19')
+
