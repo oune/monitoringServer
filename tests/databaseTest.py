@@ -14,5 +14,6 @@ class MyTestCase(IsolatedAsyncioTestCase):
         db = Database("../db/machine_1.db")
         await db.save_now(3.1111)
 
+
 if __name__ == '__main__':
     unittest.main()

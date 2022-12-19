@@ -8,6 +8,7 @@ from configparser import ConfigParser
 from fastapi import FastAPI
 from time import ctime, time
 from dataController import DataController
+from db import Database
 from model import AeModel
 
 import nidaqmx
@@ -124,13 +125,15 @@ def get_stat_month(date: datetime.date):
 
 
 @app.get("/{date}")
-def get_stat_day(date: datetime.date):
-    return {'date': date}
+async def get_stat_day(date: datetime.date):
+    db = Database("db/machine_1.db")
+    res = await db.get_by_one_day(date)
+    return {'machine_1': res}
 
 
 if __name__ == "__main__":
     conf = ConfigParser()
-    conf.read('config.ini')
+    conf.read('resource/config.ini')
 
     sensor_vib, sensor_temp = sensor_load(conf)
     socket_app = socketio.ASGIApp(sio, app)
