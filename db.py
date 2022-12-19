@@ -74,5 +74,6 @@ class Database:
 
         self.execute(query)
 
-
+    def save_now(self, data):
+        self.save(datetime.now(), data)
 
