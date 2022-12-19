@@ -26,16 +26,7 @@ class Database:
             conn.close()
 
     async def execute(self, func):
-        try:
-            conn = sqlite3.connect(self.path)
-            res = func(conn)
-            conn.commit()
-            return res
-        except Exception as e:
-            print(e)
-            conn.rollback()
-        finally:
-            conn.close()
+        return self.execute_sync(func)
 
     def check_data_table(self):
         def query(conn):
