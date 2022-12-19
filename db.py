@@ -11,9 +11,21 @@ class Database:
             if not has_data_table:
                 self.init_table()
 
-        self.execute(table_init)
+        self.execute_sync(table_init)
 
-    def execute(self, func):
+    def execute_sync(self, func):
+        try:
+            conn = sqlite3.connect(self.path)
+            res = func(conn)
+            conn.commit()
+            return res
+        except Exception as e:
+            print(e)
+            conn.rollback()
+        finally:
+            conn.close()
+
+    async def execute(self, func):
         try:
             conn = sqlite3.connect(self.path)
             res = func(conn)
@@ -35,45 +47,45 @@ class Database:
             else:
                 return False
 
-        return self.execute(query)
+        return self.execute_sync(query)
 
     def init_table(self):
         def query(conn):
             conn.execute("CREATE TABLE data(id INTEGER PRIMARY KEY AUTOINCREMENT, time TIMESTAMP, value REAL)")
 
-        self.execute(query)
+        self.execute_sync(query)
 
-    def get_all(self):
+    async def get_all(self):
         def query(conn):
             cur = conn.cursor()
             cur.execute('select time, value from data order by time')
             return cur.fetchall()
 
-        return self.execute(query)
+        return await self.execute(query)
 
-    def get_by_one_day(self, date):
+    async def get_by_one_day(self, date):
         def query(conn):
             cur = conn.cursor()
-            cur.execute('SELECT time, value FROM data WHERE DATE(time) == ? order by time', (date, ))
+            cur.execute('SELECT time, value FROM data WHERE DATE(time) == ? order by time', (date,))
             return cur.fetchall()
 
-        return self.execute(query)
+        return await self.execute(query)
 
-    def get_by_duration(self, start, end):
+    async def get_by_duration(self, start, end):
         def query(conn):
             cur = conn.cursor()
-            cur.execute('SELECT time, value FROM data WHERE DATE(time) >= ? and DATE(time) <= ? order by time', (start, end))
+            cur.execute('SELECT time, value FROM data WHERE DATE(time) >= ? and DATE(time) <= ? order by time',
+                        (start, end))
             return cur.fetchall()
 
-        return self.execute(query)
+        return await self.execute(query)
 
-    def save(self, time, data: float):
+    async def save(self, time, data: float):
         def query(conn):
             cur = conn.cursor()
             cur.execute('insert into data(time, value) values (?, ?)', (time, data))
 
-        self.execute(query)
+        await self.execute(query)
 
-    def save_now(self, data):
-        self.save(datetime.now(), data)
-
+    async def save_now(self, data):
+        await self.save(datetime.now(), data)
