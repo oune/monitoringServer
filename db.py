@@ -1,5 +1,6 @@
 import sqlite3
 from datetime import datetime
+from typing import List
 
 
 class Database:
@@ -81,3 +82,10 @@ class Database:
 
     async def save_now(self, data):
         await self.save(datetime.now(), data)
+
+    async def save_many(self, datas: List[tuple[str, float]]):
+        def query(conn):
+            cur = conn.cursor()
+            cur.executemany('insert into data(time, value) values (?, ?)', datas)
+
+        await self.execute(query)

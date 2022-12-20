@@ -14,6 +14,15 @@ class MyTestCase(IsolatedAsyncioTestCase):
         db = Database("../db/machine_1.db")
         await db.save_now(3.1111)
 
+    async def test_save_many(self):
+        db = Database("../db/machine_1.db")
+        data = [
+            ('2022-10-12 00:01:00.000', 2.111),
+            ('2022-10-12 00:02:00.000', 3.111),
+            ('2022-10-12 00:03:00.000', 4.111),
+        ]
+        await db.save_many(data)
+
 
 if __name__ == '__main__':
     unittest.main()
