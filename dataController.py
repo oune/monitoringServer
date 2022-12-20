@@ -45,6 +45,25 @@ class Machine:
         await self.model_trigger()
 
 
+class Statistics:
+    def __init__(self):
+        self.data_sum = 0
+        self.size = 0
+
+    def add(self, datas):
+        self.data_sum += sum(datas)
+        self.size += len(datas)
+
+    def reset(self):
+        self.data_sum = 0
+        self.size = 0
+
+    def get_average(self):
+        average = self.data_sum / self.size
+        self.reset()
+
+        return average
+
 class DataController:
     def __init__(self, model_req: Callable[[List[float], List[float], List[float]], Awaitable[None]], batch_size):
         self.machine1 = Machine('machine1', model_req, batch_size)
