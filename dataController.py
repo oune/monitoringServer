@@ -35,9 +35,9 @@ class Machine:
     def add_vib_right(self, data):
         self.vib_right.extend(data)
 
-    async def add_vib(self, data_list):
-        self.add_vib_left(data_list[0])
-        self.add_vib_right(data_list[1])
+    async def add_vib(self, left_data, right_data):
+        self.add_vib_left(left_data)
+        self.add_vib_right(right_data)
         await self.model_trigger()
 
     async def add_temp(self, data):
@@ -64,14 +64,17 @@ class Statistics:
 
         return average
 
+
 class DataController:
-    def __init__(self, model_req: Callable[[List[float], List[float], List[float]], Awaitable[None]], batch_size):
+    def __init__(self, model_req: Callable[[List[float], List[float], List[float]], Awaitable[None]], batch_size,
+                 sampling_rate: int):
         self.machine1 = Machine('machine1', model_req, batch_size)
         self.machine2 = Machine('machine2', model_req, batch_size)
+        self.sampling_rate = sampling_rate
 
     async def add_vib(self, message: dict):
-        await self.machine1.add_vib([message['machine1_left'], message['machine1_right']])
-        await self.machine2.add_vib([message['machine2_left'], message['machine2_right']])
+        await self.machine1.add_vib(message['machine1_left'], message['machine1_right'])
+        await self.machine2.add_vib(message['machine2_left'], message['machine2_right'])
 
     async def add_temp(self, message: dict):
         await self.machine1.add_temp(message['machine1'])
