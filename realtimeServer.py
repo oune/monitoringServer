@@ -122,12 +122,9 @@ app = FastAPI()
 
 
 @app.get("/month/{date}")
-def get_stat_month(start: datetime.date, end: datetime.date):
-    db_1 = Database(db_1_path)
-    db_2 = Database(db_2_path)
-
-    machine_1_res = await db_1.get_by_duration(start, end)
-    machine_2_res = await db_2.get_by_duration(start, end)
+async def get_stat_month(start: datetime.date, end: datetime.date):
+    machine_1_res = await Database(db_1_path).get_by_duration(start, end)
+    machine_2_res = await Database(db_2_path).get_by_duration(start, end)
 
     return {'machine_1': machine_1_res,
             'machine_2': machine_2_res}
@@ -135,11 +132,8 @@ def get_stat_month(start: datetime.date, end: datetime.date):
 
 @app.get("/{date}")
 async def get_stat_day(date: datetime.date):
-    db_1 = Database(db_1_path)
-    db_2 = Database(db_2_path)
-
-    machine_1_res = await db_1.get_by_one_day(date)
-    machine_2_res = await db_2.get_by_one_day(date)
+    machine_1_res = await Database(db_1_path).get_by_one_day(date)
+    machine_2_res = await Database(db_2_path).get_by_one_day(date)
 
     return {'machine_1': machine_1_res,
             'machine_2': machine_2_res}
