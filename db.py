@@ -14,14 +14,15 @@ class Database:
         self.execute_sync(table_init)
 
     def execute_sync(self, func):
+        conn = None
         try:
             conn = sqlite3.connect(self.path)
             res = func(conn)
             conn.commit()
             return res
         except Exception as e:
-            print(e)
             conn.rollback()
+            print(e)
         finally:
             conn.close()
 
