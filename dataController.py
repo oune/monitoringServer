@@ -6,6 +6,7 @@ from db import Database
 db_1_path = "db/machine_1.db"
 db_2_path = "db/machine_2.db"
 
+
 class ModelMachine:
     def __init__(self, name: str,
                  callback: Callable[[List[float], List[float], List[float], str], Awaitable[None]],
@@ -86,7 +87,7 @@ class Statistics:
         self.size = 0
 
     def add(self, datas):
-        self.data_sum += sum(abs(datas))
+        self.data_sum += sum(list(map(abs, datas)))
         self.size += len(datas)
 
     def reset(self):

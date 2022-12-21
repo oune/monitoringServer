@@ -36,7 +36,7 @@ async def model_req(left: List[float], right: List[float], temp: List[float], na
         print(e)
 
 
-dc = DataController(model_req, 384)
+dc = DataController(model_req, 384, 10)
 
 
 def sensor_config_load(config: ConfigParser):
