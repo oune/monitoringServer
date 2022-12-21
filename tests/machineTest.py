@@ -1,5 +1,5 @@
 import unittest
-from dataController import Machine
+from dataController import ModelMachine
 
 
 class MyTestCase(unittest.TestCase):
@@ -7,7 +7,7 @@ class MyTestCase(unittest.TestCase):
         def do_pass():
             pass
 
-        machine = Machine(do_pass, 3)
+        machine = ModelMachine(do_pass, 3)
         machine.add_vib_left([1, 2, 3])
         self.assertEqual(machine.vib_left, [1, 2, 3])
         machine.add_vib_right([1, 2, 3])
@@ -21,7 +21,7 @@ class MyTestCase(unittest.TestCase):
         def do_pass():
             pass
 
-        machine = Machine(do_pass, 10)
+        machine = ModelMachine(do_pass, 10)
         machine.add_vib_left([1, 2, 3])
         self.assertEqual(machine.vib_left, [1, 2, 3])
         machine.add_vib_right([1, 2, 3])
