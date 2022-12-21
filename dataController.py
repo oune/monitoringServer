@@ -2,6 +2,10 @@ from typing import Callable, List, Awaitable
 from clock import TimeController
 from db import Database
 
+
+db_1_path = "db/machine_1.db"
+db_2_path = "db/machine_2.db"
+
 class ModelMachine:
     def __init__(self, name: str,
                  callback: Callable[[List[float], List[float], List[float], str], Awaitable[None]],
@@ -46,7 +50,7 @@ class ModelMachine:
         await self.trigger()
 
 
-class StatModel:
+class StatMachine:
     def __init__(self, name, db: Database):
         self.name = name
         self.left = Statistics()
@@ -56,7 +60,10 @@ class StatModel:
         self.db = db
 
     async def callback(self):
-        self.db.save_now(self.left.get_average())
+        avr_left = self.left.get_average()
+        avr_right = self.right.get_average()
+        avr_temp = self.temp.get_average()
+        await self.db.save_now(avr_left, avr_right, avr_temp)
 
     async def trigger(self):
         is_hour_changed = self.time.is_hour_change()
@@ -96,14 +103,23 @@ class Statistics:
 class DataController:
     def __init__(self, model_req: Callable[[List[float], List[float], List[float]], Awaitable[None]], batch_size,
                  sampling_rate: int):
+        db1 = Database(db_1_path)
+        db2 = Database(db_2_path)
+
         self.machine1 = ModelMachine('machine1', model_req, batch_size)
         self.machine2 = ModelMachine('machine2', model_req, batch_size)
+        self.machine1_stat = StatMachine('machine1', db1)
+        self.machine2_stat = StatMachine('machine2', db2)
         self.sampling_rate = sampling_rate
 
     async def add_vib(self, message: dict):
         await self.machine1.add_vib(message['machine1_left'], message['machine1_right'])
         await self.machine2.add_vib(message['machine2_left'], message['machine2_right'])
+        await self.machine1_stat.add_vib(message['machine1_left'], message['machine1_right'])
+        await self.machine2_stat.add_vib(message['machine2_left'], message['machine2_right'])
 
     async def add_temp(self, message: dict):
         await self.machine1.add_temp(message['machine1'])
         await self.machine2.add_temp(message['machine2'])
+        await self.machine1_stat.add_temp(message['machine1'])
+        await self.machine2_stat.add_temp(message['machine2'])
