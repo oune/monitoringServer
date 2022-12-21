@@ -44,14 +44,15 @@ class Database:
 
     def init_table(self):
         def query(conn):
-            conn.execute("CREATE TABLE data(id INTEGER PRIMARY KEY AUTOINCREMENT, time TIMESTAMP, value REAL)")
+            conn.execute("CREATE TABLE data(id INTEGER PRIMARY KEY AUTOINCREMENT, time TIMESTAMP,"
+                         " left_vib REAL, right_vib REAL, temperature REAL)")
 
         self.execute_sync(query)
 
     async def get_all(self):
         def query(conn):
             cur = conn.cursor()
-            cur.execute('select time, value from data order by time')
+            cur.execute('select time, left_vib, right_vib, temperature from data order by time')
             return cur.fetchall()
 
         return await self.execute(query)
@@ -59,7 +60,8 @@ class Database:
     async def get_by_one_day(self, date):
         def query(conn):
             cur = conn.cursor()
-            cur.execute('SELECT time, value FROM data WHERE DATE(time) == ? order by time', (date,))
+            cur.execute('SELECT time, left_vib, right_vib, temperature value '
+                        'FROM data WHERE DATE(time) == ? order by time', (date,))
             return cur.fetchall()
 
         return await self.execute(query)
@@ -67,25 +69,27 @@ class Database:
     async def get_by_duration(self, start, end):
         def query(conn):
             cur = conn.cursor()
-            cur.execute('SELECT time, value FROM data WHERE DATE(time) >= ? and DATE(time) <= ? order by time',
+            cur.execute('SELECT time, left_vib, right_vib, temperature'
+                        ' FROM data WHERE DATE(time) >= ? and DATE(time) <= ? order by time',
                         (start, end))
             return cur.fetchall()
 
         return await self.execute(query)
 
-    async def save(self, time, data: float):
+    async def save(self, time, left: float, right: float, temp: float):
         def query(conn):
             cur = conn.cursor()
-            cur.execute('insert into data(time, value) values (?, ?)', (time, data))
+            cur.execute('insert into data(time, left_vib, right_vib, temperature) values (?, ?, ?, ?)'
+                        , (time, left, right, temp))
 
         await self.execute(query)
 
-    async def save_now(self, data):
-        await self.save(datetime.now(), data)
+    async def save_now(self, left, right, temp):
+        await self.save(datetime.now(), left, right, temp)
 
-    async def save_many(self, datas: List[tuple[str, float]]):
+    async def save_many(self, datas: List[tuple[str, float, float, float]]):
         def query(conn):
             cur = conn.cursor()
-            cur.executemany('insert into data(time, value) values (?, ?)', datas)
+            cur.executemany('insert into data(time, left_vib, right_vib, temperature) values (?, ?, ?, ?)', datas)
 
         await self.execute(query)
