@@ -14,6 +14,11 @@ class CsvWriter:
         return path
 
     def save(self, datas):
-        with open(self.get_path(), "w") as file:
+        path = self.get_path()
+
+        # TODO if path 가 존재하지 않는다면 파일을 만들고 헤더를 추가
+
+        transpose = [list(x) for x in zip(*datas)]
+        with open(path, "a", newline='\n') as file:
             writer = csv.writer(file)
-            # TODO write to csv
+            writer.writerows(transpose)
