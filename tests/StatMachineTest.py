@@ -6,6 +6,7 @@ from db import Database
 
 db_1_path = "../db/machine_1.db"
 
+
 class MyTestCase(IsolatedAsyncioTestCase):
     async def test_callback(self):
         db1 = Database(db_1_path)
