@@ -40,6 +40,30 @@ async def sensor_loop_temp():
         await sio.emit('temp', message)
 
 
+async def sensor_loop_model1():
+    print('model1 loop start')
+    while True:
+        message = {
+            'name': 'machine1',
+            'score': random.random(),
+        }
+
+        await sio.sleep(4)
+        await sio.emit('model', message)
+
+
+async def sensor_loop_model2():
+    print('model2 loop start')
+    while True:
+        message = {
+            'name': 'machine2',
+            'score': random.random(),
+        }
+
+        await sio.sleep(4)
+        await sio.emit('model', message)
+
+
 @app.get("/month/{date}")
 def get_stat_month(date: datetime.date):
     return {'date': date}
@@ -63,7 +87,11 @@ if __name__ == "__main__":
 
     sensor_task_vib = sio.start_background_task(sensor_loop_vib)
     sensor_task_temp = sio.start_background_task(sensor_loop_temp)
+    sensor_task_model1 = sio.start_background_task(sensor_loop_model1)
+    sensor_task_model2 = sio.start_background_task(sensor_loop_model2)
 
     main_loop.run_until_complete(server.serve())
     main_loop.run_until_complete(sensor_task_vib)
     main_loop.run_until_complete(sensor_task_temp)
+    main_loop.run_until_complete(sensor_task_model1)
+    main_loop.run_until_complete(sensor_task_model2)
