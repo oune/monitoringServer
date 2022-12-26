@@ -5,7 +5,7 @@ from csvwriter import CsvWriter
 
 class MyTestCase(unittest.TestCase):
     def test_something(self):
-        cs = CsvWriter('data', 'machine1')
+        cs = CsvWriter('data', 'temp', ['123', '223', '323'])
         print(cs.get_path())
 
     def test_write(self):
