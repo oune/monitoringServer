@@ -1,4 +1,6 @@
 /db
-/resource/model8.pth
+/data
+/tests/db
 /tests/data
 /tests/test.csv
+/resource/model8.pth
