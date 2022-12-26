@@ -1,5 +1,7 @@
 import csv
 import os
+from typing import List
+
 from clock import get_day
 
 
@@ -10,7 +12,7 @@ async def save_data(path, datas):
 
 
 class CsvWriter:
-    def __init__(self, directory, device_name, header):
+    def __init__(self, directory, device_name, header: List[str]):
         self.directory = directory
         self.device_name = device_name
         self.header = header

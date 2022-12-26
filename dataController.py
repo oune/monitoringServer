@@ -1,7 +1,7 @@
 from typing import Callable, List, Awaitable
 from clock import TimeController
 from db import Database
-
+from csvwriter import CsvWriter
 
 db_1_path = "db/machine_1.db"
 db_2_path = "db/machine_2.db"
@@ -111,6 +111,9 @@ class DataController:
         self.machine2 = ModelMachine('machine2', model_req, batch_size)
         self.machine1_stat = StatMachine('machine1', db1)
         self.machine2_stat = StatMachine('machine2', db2)
+        self.vib_writer = CsvWriter('data', 'vib',
+                                    ['time', 'machine1_left', 'machine1_right', 'machine2_left', 'machine2_right'])
+        self.temp_writer = CsvWriter('data', 'temp', ['time', 'machine1', 'machine2'])
         self.sampling_rate = sampling_rate
 
     async def add_vib(self, message: dict):
@@ -118,9 +121,14 @@ class DataController:
         await self.machine2.add_vib(message['machine2_left'], message['machine2_right'])
         await self.machine1_stat.add_vib(message['machine1_left'], message['machine1_right'])
         await self.machine2_stat.add_vib(message['machine2_left'], message['machine2_right'])
+        await self.vib_writer.save([[message['time'] for _ in range(len(message['machine1_left']))],
+                                    message['machine1_left'], message['machine1_right'],
+                                    message['machine2_left'], message['machine2_right']])
 
     async def add_temp(self, message: dict):
         await self.machine1.add_temp(message['machine1'])
         await self.machine2.add_temp(message['machine2'])
         await self.machine1_stat.add_temp(message['machine1'])
         await self.machine2_stat.add_temp(message['machine2'])
+        await self.temp_writer.save([[message['time'] for _ in range(len(message['machine1']))],
+                                     message['machine1'], message['machine2']])
