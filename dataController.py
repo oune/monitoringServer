@@ -2,6 +2,7 @@ from typing import Callable, List, Awaitable
 from clock import TimeController
 from db import Database
 from csvwriter import CsvWriter
+from scipy import signal
 
 db_1_path = "db/machine_1.db"
 db_2_path = "db/machine_2.db"
@@ -117,18 +118,35 @@ class DataController:
         self.sampling_rate = sampling_rate
 
     async def add_vib(self, message: dict):
-        await self.machine1.add_vib(message['machine1_left'], message['machine1_right'])
-        await self.machine2.add_vib(message['machine2_left'], message['machine2_right'])
-        await self.machine1_stat.add_vib(message['machine1_left'], message['machine1_right'])
-        await self.machine2_stat.add_vib(message['machine2_left'], message['machine2_right'])
+        machine1_left = message['machine1_left']
+        machine1_right = message['machine1_right']
+        machine2_left = message['machine2_left']
+        machine2_right = message['machine2_right']
+        machine1_left_resampled = signal.resample(machine1_left, self.sampling_rate)
+        machine1_right_resampled = signal.resample(machine1_right, self.sampling_rate)
+        machine2_left_resampled = signal.resample(machine2_left, self.sampling_rate)
+        machine2_right_resampled = signal.resample(machine2_right, self.sampling_rate)
+
+        await self.machine1.add_vib(machine1_left_resampled, machine1_right_resampled)
+        await self.machine2.add_vib(machine2_left_resampled, machine2_right_resampled)
+
+        await self.machine1_stat.add_vib(machine1_left, machine1_right)
+        await self.machine2_stat.add_vib(machine2_left, machine2_right)
+
         await self.vib_writer.save([[message['time'] for _ in range(len(message['machine1_left']))],
-                                    message['machine1_left'], message['machine1_right'],
-                                    message['machine2_left'], message['machine2_right']])
+                                    machine1_left, machine1_right, machine2_left, machine2_right])
 
     async def add_temp(self, message: dict):
-        await self.machine1.add_temp(message['machine1'])
-        await self.machine2.add_temp(message['machine2'])
-        await self.machine1_stat.add_temp(message['machine1'])
-        await self.machine2_stat.add_temp(message['machine2'])
+        machine1 = message['machine1']
+        machine2 = message['machine2']
+        machine1_resampled = signal.resample(machine1, self.sampling_rate)
+        machine2_resampled = signal.resample(machine2, self.sampling_rate)
+
+        await self.machine1.add_temp(machine1_resampled)
+        await self.machine2.add_temp(machine2_resampled)
+
+        await self.machine1_stat.add_temp(machine1)
+        await self.machine2_stat.add_temp(machine2)
+
         await self.temp_writer.save([[message['time'] for _ in range(len(message['machine1']))],
-                                     message['machine1'], message['machine2']])
+                                     machine1, machine2])
