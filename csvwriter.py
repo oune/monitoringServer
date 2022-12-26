@@ -8,8 +8,7 @@ class CsvWriter:
         self.directory = directory
         self.device_name = device_name
         self.header = header
-        path = self.get_path()
-        self.file_init(path)
+
 
     def get_path(self) -> str:
         path = os.path.join(self.directory, self.device_name + '_' + get_day() + '.csv')
@@ -27,6 +26,7 @@ class CsvWriter:
 
     def save(self, datas):
         path = self.get_path()
+        self.file_init(path)
 
         transpose = [list(x) for x in zip(*datas)]
         with open(path, "a", newline='\n') as file:
