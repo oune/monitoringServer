@@ -3,19 +3,22 @@ import os
 from clock import get_day
 
 
+async def save_data(path, datas):
+    with open(path, "a", newline='\n') as file:
+        writer = csv.writer(file)
+        writer.writerows(datas)
+
+
 class CsvWriter:
     def __init__(self, directory, device_name, header):
         self.directory = directory
         self.device_name = device_name
         self.header = header
 
+    async def get_path(self) -> str:
+        return os.path.join(self.directory, self.device_name + '_' + get_day() + '.csv')
 
-    def get_path(self) -> str:
-        path = os.path.join(self.directory, self.device_name + '_' + get_day() + '.csv')
-
-        return path
-
-    def file_init(self, path: str):
+    async def file_init(self, path: str):
         if not os.path.exists(self.directory):
             os.makedirs(self.directory)
 
@@ -24,11 +27,9 @@ class CsvWriter:
                 writer = csv.writer(file)
                 writer.writerow(self.header)
 
-    def save(self, datas):
-        path = self.get_path()
-        self.file_init(path)
+    async def save(self, datas):
+        path = await self.get_path()
+        await self.file_init(path)
 
         transpose = [list(x) for x in zip(*datas)]
-        with open(path, "a", newline='\n') as file:
-            writer = csv.writer(file)
-            writer.writerows(transpose)
+        await save_data(path, transpose)
