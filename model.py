@@ -167,6 +167,8 @@ class Regression:
         device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         self.model = RegressionModel()
         self.model.load_state_dict(torch.load(model_prt_path, map_location=device))
+        self.model.to(device)
+        self.model.eval()
 
     async def get_time(self, model_score: float):
         res = self.model(torch.Tensor([model_score]))
@@ -183,17 +185,4 @@ class Model:
         score = await self.ae_model.get_score(model_res)
         time = await self.reg_model.get_time(score)
 
-        return score, time
-
-
-if __name__ == "__main__":
-    list1: List[float] = [0.001 for _ in range(0, 3 * 128)]
-    list2: List[float] = [0.002 for _ in range(0, 3 * 128)]
-    list3: List[float] = [0.003 for _ in range(0, 3 * 128)]
-
-    model_path = 'resource/model8.pth'
-    init_data_path = 'resource/init_data_path.data'
-    model = AeModel(model_path, init_data_path)
-    model_res_ = model.inference_model(list1, list2, list3)
-    score_ = model.get_score(model_res_)
-    print(score_)
+        return score, time.item()
