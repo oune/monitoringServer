@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from time import ctime, time
 from dataController import DataController
 from db import Database
-from model import AeModel
+from model import Model
 
 import nidaqmx
 import asyncio
@@ -18,18 +18,19 @@ import socketio
 
 model_path = 'resource/model8.pth'
 init_data_path = 'resource/init_data_path.data'
+reg_model_path = 'resource/prognostics.pth'
 db_1_path = "db/machine_1.db"
 db_2_path = "db/machine_2.db"
-model = AeModel(model_path, init_data_path)
+model = Model(model_path, init_data_path, reg_model_path)
 
 
 async def model_req(left: List[float], right: List[float], temp: List[float], name: str):
     try:
-        model_res = await model.inference_model(left, right, temp)
-        score = await model.get_score(model_res)
+        score, exp_time = await model.get_model_res(left, right, temp)
         message = {
             'name': name,
             'score': score,
+            'remain_time': exp_time,
         }
         await sio.emit('model', message)
     except Exception as e:

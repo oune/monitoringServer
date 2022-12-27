@@ -15,6 +15,5 @@ class MyTestCase(IsolatedAsyncioTestCase):
         print(score, time)
 
 
-
 if __name__ == '__main__':
     unittest.main()
