@@ -4,9 +4,6 @@ from db import Database
 from csvwriter import CsvWriter
 from scipy import signal
 
-db_1_path = "db/machine_1.db"
-db_2_path = "db/machine_2.db"
-
 
 class ModelMachine:
     def __init__(self, name: str,
@@ -104,7 +101,7 @@ class Statistics:
 
 class DataController:
     def __init__(self, model_req: Callable[[List[float], List[float], List[float]], Awaitable[None]], batch_size,
-                 sampling_rate: int):
+                 sampling_rate: int, db_1_path, db_2_path):
         db1 = Database(db_1_path)
         db2 = Database(db_2_path)
 

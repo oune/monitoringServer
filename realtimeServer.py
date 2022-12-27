@@ -16,11 +16,14 @@ import asyncio
 import datetime
 import socketio
 
-model_path = 'resource/model8.pth'
-init_data_path = 'resource/init_data_path.data'
-reg_model_path = 'resource/prognostics.pth'
-db_1_path = "db/machine_1.db"
-db_2_path = "db/machine_2.db"
+conf = ConfigParser()
+conf.read('resource/config.ini')
+model_path = conf['model']['score_model']
+init_data_path = conf['model']['calc_init']
+reg_model_path = conf['model']['time_model']
+db_1_path = conf['database']['machine1']
+db_2_path = conf['database']['machine2']
+
 model = Model(model_path, init_data_path, reg_model_path)
 
 
@@ -37,7 +40,7 @@ async def model_req(left: List[float], right: List[float], temp: List[float], na
         print(e)
 
 
-dc = DataController(model_req, 384, 10)
+dc = DataController(model_req, 384, 10, db_1_path, db_2_path)
 
 
 def sensor_config_load(config: ConfigParser):
@@ -141,9 +144,6 @@ async def get_stat_day(date: datetime.date):
 
 
 if __name__ == "__main__":
-    conf = ConfigParser()
-    conf.read('resource/config.ini')
-
     sensor_vib, sensor_temp = sensor_load(conf)
     socket_app = socketio.ASGIApp(sio, app)
 
