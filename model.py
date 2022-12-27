@@ -98,7 +98,7 @@ class LSTMAutoEncoder(nn.Module):
 
 class AnomalyCalculator:
     def __init__(self, mean: np.array, std: np.array):
-        assert mean.shape[0] == std.shape[0] and mean.shape[0] == std.shape[1], '?됯퇏怨?遺꾩궛??李⑥썝???묎컳?꾩빞 ?⑸땲??'
+        assert mean.shape[0] == std.shape[0] and mean.shape[0] == std.shape[1], 'warning wrong dimension'
         self.mean = mean
         self.std = std
 
