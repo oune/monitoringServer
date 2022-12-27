@@ -101,7 +101,7 @@ class Statistics:
 
 class DataController:
     def __init__(self, model_req: Callable[[List[float], List[float], List[float]], Awaitable[None]], batch_size,
-                 sampling_rate: int, db_1_path, db_2_path):
+                 sampling_rate: int, db_1_path, db_2_path, raw_directory):
         db1 = Database(db_1_path)
         db2 = Database(db_2_path)
 
@@ -109,9 +109,9 @@ class DataController:
         self.machine2 = ModelMachine('machine2', model_req, batch_size)
         self.machine1_stat = StatMachine('machine1', db1)
         self.machine2_stat = StatMachine('machine2', db2)
-        self.vib_writer = CsvWriter('data', 'vib',
+        self.vib_writer = CsvWriter(raw_directory, 'vib',
                                     ['time', 'machine1_left', 'machine1_right', 'machine2_left', 'machine2_right'])
-        self.temp_writer = CsvWriter('data', 'temp', ['time', 'machine1', 'machine2'])
+        self.temp_writer = CsvWriter(raw_directory, 'temp', ['time', 'machine1', 'machine2'])
         self.sampling_rate = sampling_rate
 
     async def add_vib(self, message: dict):

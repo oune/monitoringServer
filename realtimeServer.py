@@ -23,6 +23,9 @@ init_data_path = conf['model']['calc_init']
 reg_model_path = conf['model']['time_model']
 db_1_path = conf['database']['machine1']
 db_2_path = conf['database']['machine2']
+raw_directory = conf['csv']['directory']
+model_sampling_rate = int(conf['model']['rate'])
+model_batch_size = int(conf['model']['batch_size'])
 
 model = Model(model_path, init_data_path, reg_model_path)
 
@@ -40,7 +43,7 @@ async def model_req(left: List[float], right: List[float], temp: List[float], na
         print(e)
 
 
-dc = DataController(model_req, 384, 10, db_1_path, db_2_path)
+dc = DataController(model_req, model_batch_size, model_sampling_rate, db_1_path, db_2_path, raw_directory)
 
 
 def sensor_config_load(config: ConfigParser):
