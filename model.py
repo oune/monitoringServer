@@ -91,8 +91,8 @@ class LSTMAutoEncoder(nn.Module):
                       *args,
                       **kwargs) -> dict:
         recons = args[0]
-        input = args[1]
-        loss = F.mse_loss(recons, input)
+        _input = args[1]
+        loss = F.mse_loss(recons, _input)
         return loss
 
 
@@ -153,6 +153,39 @@ class AeModel:
         return ans_score
 
 
+class RegressionModel(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.linear = nn.Linear(1, 1)
+
+    def forward(self, x):
+        return self.linear(x)
+
+
+class Regression:
+    def __init__(self, model_prt_path):
+        device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+        self.model = RegressionModel()
+        self.model.load_state_dict(torch.load(model_prt_path, map_location=device))
+
+    async def get_time(self, model_score: float):
+        res = self.model(torch.Tensor([model_score]))
+        return res
+
+
+class Model:
+    def __init__(self, ae_model_path, calc_data_path, reg_model_path):
+        self.ae_model = AeModel(ae_model_path, calc_data_path)
+        self.reg_model = Regression(reg_model_path)
+
+    async def get_model_res(self, left: List[float], right: List[float], temp: List[float]):
+        model_res = await self.ae_model.inference_model(left, right, temp)
+        score = await self.ae_model.get_score(model_res)
+        time = await self.reg_model.get_time(score)
+
+        return score, time
+
+
 if __name__ == "__main__":
     list1: List[float] = [0.001 for _ in range(0, 3 * 128)]
     list2: List[float] = [0.002 for _ in range(0, 3 * 128)]
@@ -161,6 +194,6 @@ if __name__ == "__main__":
     model_path = 'resource/model8.pth'
     init_data_path = 'resource/init_data_path.data'
     model = AeModel(model_path, init_data_path)
-    model_res = model.inference_model(list1, list2, list3)
-    score = model.get_score(model_res)
-    print(score)
+    model_res_ = model.inference_model(list1, list2, list3)
+    score_ = model.get_score(model_res_)
+    print(score_)
