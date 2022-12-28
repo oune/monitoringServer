@@ -1,11 +1,16 @@
 import sqlite3
 from datetime import datetime
 from typing import List
+import os
 
 
 class Database:
     def __init__(self, path: str):
         self.path = path
+        directory = os.path.dirname(path)
+
+        if not os.path.exists(directory):
+            os.makedirs(directory)
 
         def table_init(_):
             has_data_table = self.check_data_table()
