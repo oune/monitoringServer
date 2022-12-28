@@ -2,6 +2,7 @@
 /data
 /tests/db
 /tests/data
+build
 /tests/test.csv
 /resource/model8.pth
 /resource/prognostics.pth
