@@ -2,8 +2,7 @@
 from PyInstaller.utils.hooks import copy_metadata
 
 datas = [
-    ('models/model.h5', 'models'),
-    ('config.ini', '.')
+    ('config.ini', 'resource')
 ]
 datas += copy_metadata('nidaqmx')
 
@@ -12,7 +11,7 @@ block_cipher = None
 
 
 a = Analysis(
-    ['main.py'],
+    ['realtimeServer.py'],
     pathex=[],
     binaries=[],
     datas=datas,

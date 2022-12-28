@@ -3,6 +3,7 @@
 /tests/db
 /tests/data
 build
+dist
 /tests/test.csv
 /resource/model8.pth
 /resource/prognostics.pth
