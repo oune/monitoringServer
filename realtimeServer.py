@@ -131,7 +131,7 @@ async def sensor_loop_temp():
 app = FastAPI()
 
 
-@app.get("/month/{start}/{end}")
+@app.get("/{start}/{end}")
 async def get_stat_month(start: datetime.date, end: datetime.date):
     machine_1_res = await Database(db_1_path).get_by_duration(start, end)
     machine_2_res = await Database(db_2_path).get_by_duration(start, end)
