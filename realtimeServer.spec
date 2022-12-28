@@ -3,7 +3,10 @@ from PyInstaller.utils.hooks import copy_metadata
 
 block_cipher = None
 datas = [
-    ('resource/config.ini', 'resource')
+    ('resource/config.ini', 'resource'),
+    ('resource/init_data_path.data', 'resource'),
+    ('resource/model8.pth', 'resource'),
+    ('resource/prognostics.pth', 'resource'),
 ]
 datas += copy_metadata('nidaqmx')
 
