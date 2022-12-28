@@ -26,6 +26,7 @@ db_2_path = conf['database']['machine2']
 raw_directory = conf['csv']['directory']
 model_sampling_rate = int(conf['model']['rate'])
 model_batch_size = int(conf['model']['batch_size'])
+threshold = int(conf['model']['threshold'])
 
 model = Model(model_path, init_data_path, reg_model_path)
 
@@ -33,10 +34,12 @@ model = Model(model_path, init_data_path, reg_model_path)
 async def model_req(left: List[float], right: List[float], temp: List[float], name: str):
     try:
         score, exp_time = await model.get_model_res(left, right, temp)
+        anomaly = score >= threshold
         message = {
             'name': name,
             'score': score,
             'remain_time': exp_time,
+            'anomaly': bool(anomaly)
         }
         await sio.emit('model', message)
     except Exception as e:
