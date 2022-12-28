@@ -46,6 +46,8 @@ async def sensor_loop_model1():
         message = {
             'name': 'machine1',
             'score': random.random(),
+            'remain_time': 355 + random.random(),
+            'anomaly': False
         }
 
         await sio.sleep(4)
@@ -58,6 +60,8 @@ async def sensor_loop_model2():
         message = {
             'name': 'machine2',
             'score': random.random(),
+            'remain_time': 355 + random.random(),
+            'anomaly': False
         }
 
         await sio.sleep(4)
