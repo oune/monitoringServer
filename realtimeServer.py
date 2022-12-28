@@ -39,7 +39,8 @@ async def model_req(left: List[float], right: List[float], temp: List[float], na
             'name': name,
             'score': score,
             'remain_time': exp_time,
-            'anomaly': bool(anomaly)
+            'anomaly': bool(anomaly),
+            'threshold': threshold
         }
         await sio.emit('model', message)
     except Exception as e:
