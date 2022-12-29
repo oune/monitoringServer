@@ -10,6 +10,7 @@ from time import ctime, time
 from dataController import DataController
 from db import Database
 from model import Model
+from scipy import signal
 
 import nidaqmx
 import asyncio
@@ -27,6 +28,7 @@ raw_directory = conf['csv']['directory']
 model_sampling_rate = int(conf['model']['rate'])
 model_batch_size = int(conf['model']['batch_size'])
 threshold = int(conf['model']['threshold'])
+send_sampling_rate = int(conf['server']['sampling_rate'])
 
 model = Model(model_path, init_data_path, reg_model_path)
 
@@ -108,6 +110,14 @@ async def get_sensor_message(now_time, data_tag_names, data_list):
     return message
 
 
+async def resample_message(message, sampling_rate, data_tag_names):
+    me = message.copy()
+    for tag in data_tag_names:
+        me[tag] = signal.resample(me[tag], sampling_rate).tolist()
+
+    return me
+
+
 async def add_data_by_event(event_name, message):
     if event_name == 'vib':
         await dc.add_vib(message)
@@ -119,9 +129,11 @@ async def try_read(sensor: Sensor, event_name: str, data_tag_names: list):
     now_time = ctime(time())
     data_list = await read_sensor(sensor)
     message = await get_sensor_message(now_time, data_tag_names, data_list)
+    resampled_message = await resample_message(message, send_sampling_rate, data_tag_names)
+
     await add_data_by_event(event_name, message)
     await sio.sleep(1)
-    await sio.emit(event_name, message)
+    await sio.emit(event_name, resampled_message)
 
 
 async def read(sensor: Sensor, event_name: str, data_tag_names: list):
