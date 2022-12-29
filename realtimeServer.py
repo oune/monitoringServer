@@ -94,20 +94,32 @@ def server_load(_app, _config: ConfigParser, loop: AbstractEventLoop):
 sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins='*')
 
 
-async def try_read(sensor: Sensor, event_name: str, data_tag_names: list):
-    now_time = ctime(time())
-    data_list = sensor.task.read(number_of_samples_per_channel=sensor.read_count, timeout=10.0)
+async def read_sensor(sensor: Sensor):
+    return sensor.task.read(number_of_samples_per_channel=sensor.read_count, timeout=10.0)
+
+
+async def get_sensor_message(now_time, data_tag_names, data_list):
     message = {
         'time': now_time
     }
     for idx, data in enumerate(data_list):
         message[data_tag_names[idx]] = data
 
+    return message
+
+
+async def add_data_by_event(event_name, message):
     if event_name == 'vib':
         await dc.add_vib(message)
     elif event_name == 'temp':
         await dc.add_temp(message)
 
+
+async def try_read(sensor: Sensor, event_name: str, data_tag_names: list):
+    now_time = ctime(time())
+    data_list = await read_sensor(sensor)
+    message = await get_sensor_message(now_time, data_tag_names, data_list)
+    await add_data_by_event(event_name, message)
     await sio.sleep(1)
     await sio.emit(event_name, message)
 
