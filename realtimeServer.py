@@ -141,6 +141,8 @@ async def read(sensor: Sensor, event_name: str, data_tag_names: list):
         await try_read(sensor, event_name, data_tag_names)
     except nidaqmx.errors.DaqReadError:
         pass
+    except Exception as e:
+        print(e)
 
 
 async def sensor_loop_vib():
@@ -158,32 +160,40 @@ app = FastAPI()
 
 @app.get("/{start}/{end}")
 async def get_stat_month(start: datetime.date, end: datetime.date):
-    machine_1_res = await Database(db_1_path).get_by_duration(start, end)
-    machine_2_res = await Database(db_2_path).get_by_duration(start, end)
+    try:
+        machine_1_res = await Database(db_1_path).get_by_duration(start, end)
+        machine_2_res = await Database(db_2_path).get_by_duration(start, end)
 
-    return {'machine_1': machine_1_res,
-            'machine_2': machine_2_res}
+        return {'machine_1': machine_1_res, 'machine_2': machine_2_res}
+    except Exception as e:
+        print(e)
 
 
 @app.get("/{date}")
 async def get_stat_day(date: datetime.date):
-    machine_1_res = await Database(db_1_path).get_by_one_day(date)
-    machine_2_res = await Database(db_2_path).get_by_one_day(date)
+    try:
+        machine_1_res = await Database(db_1_path).get_by_one_day(date)
+        machine_2_res = await Database(db_2_path).get_by_one_day(date)
 
-    return {'machine_1': machine_1_res,
-            'machine_2': machine_2_res}
+        return {'machine_1': machine_1_res,
+                'machine_2': machine_2_res}
+    except Exception as e:
+        print(e)
 
 
 if __name__ == "__main__":
-    sensor_vib, sensor_temp = sensor_load(conf)
-    socket_app = socketio.ASGIApp(sio, app)
+    try:
+        sensor_vib, sensor_temp = sensor_load(conf)
+        socket_app = socketio.ASGIApp(sio, app)
 
-    sensor_task_vib = sio.start_background_task(sensor_loop_vib)
-    sensor_task_temp = sio.start_background_task(sensor_loop_temp)
+        sensor_task_vib = sio.start_background_task(sensor_loop_vib)
+        sensor_task_temp = sio.start_background_task(sensor_loop_temp)
 
-    main_loop = asyncio.get_event_loop()
-    socket_server = server_load(socket_app, conf, main_loop)
+        main_loop = asyncio.get_event_loop()
+        socket_server = server_load(socket_app, conf, main_loop)
 
-    main_loop.run_until_complete(socket_server.serve())
-    main_loop.run_until_complete(sensor_task_vib)
-    main_loop.run_until_complete(sensor_task_temp)
+        main_loop.run_until_complete(socket_server.serve())
+        main_loop.run_until_complete(sensor_task_vib)
+        main_loop.run_until_complete(sensor_task_temp)
+    except Exception as e:
+        print(e)

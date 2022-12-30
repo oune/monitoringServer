@@ -30,8 +30,12 @@ class CsvWriter:
                 writer.writerow(self.header)
 
     async def save(self, datas):
-        path = await self.get_path()
-        await self.file_init(path)
+        try:
+            path = await self.get_path()
+            await self.file_init(path)
 
-        transpose = [list(x) for x in zip(*datas)]
-        await save_data(path, transpose)
+            transpose = [list(x) for x in zip(*datas)]
+            await save_data(path, transpose)
+        except Exception as e:
+            print('예외가 발생하였습니다. 전체 로그를 개발자에게 전달 부탁드립니다.')
+            print(e)
