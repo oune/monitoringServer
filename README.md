@@ -10,13 +10,14 @@
 [server]
 ip = 서버 호스트 아이피
 port = 서버 호스트 포트번호
+sampling_rate = 실시간 전송 데이터 개
 
 [database]
 machine1 = 통계저장 db 경로, 확장자 .db
 machine2 = 
 
 [sensor]
-rate = 센서 데이터 수집 주기
+rate = 센서 데이터 수집 주기, 해당 샘플링 레이트로 데이터가 저장됨
 
 [temp]
 device = 온도 수집 ni 장치 이름
