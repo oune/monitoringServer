@@ -34,38 +34,6 @@ is_test = conf['test']['is_test']
 
 model = Model(model_path, init_data_path, reg_model_path)
 
-class ErrorData(init_data_path):
-    def __init__(self):
-        self.df = pd.read_csv('error_data.csv')
-
-        mean_df = self.df.mean()
-        std_df = self.df.std()
-        self.df = (self.df-mean_df)/std_df
-        self.cursor = 0
-        
-        with open(init_data_path, "rb") as fr:
-            self.init_data = pickle.load(fr)
-        
-    def getNext(self):
-        if self.cursor > len(self.df):
-            return None
-        value = self.df.loc[self.cursor:self.cursor+383]
-        self.cursor += 383
-        return value
-    
-    def get_score(score):
-        x = (score - self.init_data['mean'])
-        return np.matmul(np.matmul(x, self.init_data['std']), x.T)
-
-async def error_data_read():
-    while True:
-        await error_data_update()
-        
-async def error_data_update():
-    d = error.getNext()
-    left = d['left']
-    right = d['right']
-    temp = d['temp']
 
 async def model_req(left: List[float], right: List[float], temp: List[float], name: str):
     try:
@@ -73,7 +41,7 @@ async def model_req(left: List[float], right: List[float], temp: List[float], na
 
         if name == 'machine1':
             threshold = threshold_machine1
-        else :
+        else:
             threshold = threshold_machine2
 
         anomaly = score >= threshold
@@ -119,8 +87,6 @@ def try_sensor_load(config: ConfigParser):
 
 def sensor_load(config: ConfigParser):
     try:
-        if is_test : 
-            
         return try_sensor_load(config)
     except nidaqmx.errors.DaqError:
         print('잘못된 설정값이 입력 되었습니다. config.ini 파일을 올바르게 수정해 주세요.')
@@ -228,20 +194,14 @@ if __name__ == "__main__":
         sensor_vib, sensor_temp = sensor_load(conf)
         socket_app = socketio.ASGIApp(sio, app)
         main_loop = asyncio.get_event_loop()
-        socket_server = server_load(socket_app, conf, loop)
-        
-        if is_test : 
-            main_loop.run_until_complete(socket_server.serve())
-            main_loop.run_until_complete(error_data_read)
-        else :
-            sensor_vib, sensor_temp = sensor_load(conf)
+        socket_server = server_load(socket_app, conf, main_loop)
 
-            sensor_task_vib = sio.start_background_task(sensor_loop_vib)
-            sensor_task_temp = sio.start_background_task(sensor_loop_temp)
+        sensor_task_vib = sio.start_background_task(sensor_loop_vib)
+        sensor_task_temp = sio.start_background_task(sensor_loop_temp)
 
-            main_loop.run_until_complete(socket_server.serve())
-            main_loop.run_until_complete(sensor_task_vib)
-            main_loop.run_until_complete(sensor_task_temp)
-            
+        main_loop.run_until_complete(socket_server.serve())
+        main_loop.run_until_complete(sensor_task_vib)
+        main_loop.run_until_complete(sensor_task_temp)
+
     except Exception as e:
         print(e)
