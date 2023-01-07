@@ -109,8 +109,6 @@ def try_sensor_load(config: ConfigParser):
     vib, temp = init_sensor(rate, buffer_size, vib_channel, temp_channel)
     return vib, temp
 
-def test_sensor_load():
-    
 
 def sensor_load(config: ConfigParser):
     try:
