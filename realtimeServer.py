@@ -27,7 +27,8 @@ db_2_path = conf['database']['machine2']
 raw_directory = conf['csv']['directory']
 model_sampling_rate = int(conf['model']['rate'])
 model_batch_size = int(conf['model']['batch_size'])
-threshold = int(conf['model']['threshold'])
+threshold_machine1 = int(conf['model']['threshold_machine1'])
+threshold_machine2 = int(conf['model']['threshold_machine2'])
 send_sampling_rate = int(conf['server']['sampling_rate'])
 is_test = conf['test']['is_test']
 
@@ -69,6 +70,12 @@ async def error_data_update():
 async def model_req(left: List[float], right: List[float], temp: List[float], name: str):
     try:
         score, exp_time = await model.get_model_res(left, right, temp)
+
+        if name == 'machine1':
+            threshold = threshold_machine1
+        else :
+            threshold = threshold_machine2
+
         anomaly = score >= threshold
         message = {
             'name': name,
