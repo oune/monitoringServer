@@ -11,6 +11,7 @@ from dataController import DataController
 from db import Database
 from model import Model
 from scipy import signal
+from normalization import Normalization
 
 import nidaqmx
 import asyncio
@@ -31,6 +32,7 @@ threshold_machine1 = int(conf['model']['threshold_machine1'])
 threshold_machine2 = int(conf['model']['threshold_machine2'])
 send_sampling_rate = int(conf['server']['sampling_rate'])
 is_test = conf['test']['is_test']
+normalization_path = conf['norm']['path']
 
 model = Model(model_path, init_data_path, reg_model_path)
 
@@ -53,11 +55,12 @@ async def model_req(left: List[float], right: List[float], temp: List[float], na
             'threshold': threshold
         }
         await sio.emit('model', message)
-    except Exception as e:
-        print(e)
+    except Exception as error:
+        print(error)
 
 
-dc = DataController(model_req, model_batch_size, model_sampling_rate, db_1_path, db_2_path, raw_directory)
+dc = DataController(model_req, Normalization(normalization_path),
+                    model_batch_size, model_sampling_rate, db_1_path, db_2_path, raw_directory)
 
 
 def sensor_config_load(config: ConfigParser):
@@ -149,8 +152,8 @@ async def read(sensor: Sensor, event_name: str, data_tag_names: list):
         await try_read(sensor, event_name, data_tag_names)
     except nidaqmx.errors.DaqReadError:
         pass
-    except Exception as e:
-        print(e)
+    except Exception as error:
+        print(error)
 
 
 async def sensor_loop_vib():
@@ -185,23 +188,19 @@ async def get_stat_day(date: datetime.date):
 
         return {'machine_1': machine_1_res,
                 'machine_2': machine_2_res}
-    except Exception as e:
-        print(e)
+    except Exception as error:
+        print(error)
 
 
 if __name__ == "__main__":
-    try:
-        sensor_vib, sensor_temp = sensor_load(conf)
-        socket_app = socketio.ASGIApp(sio, app)
-        main_loop = asyncio.get_event_loop()
-        socket_server = server_load(socket_app, conf, main_loop)
+    sensor_vib, sensor_temp = sensor_load(conf)
+    socket_app = socketio.ASGIApp(sio, app)
+    main_loop = asyncio.get_event_loop()
+    socket_server = server_load(socket_app, conf, main_loop)
 
-        sensor_task_vib = sio.start_background_task(sensor_loop_vib)
-        sensor_task_temp = sio.start_background_task(sensor_loop_temp)
+    sensor_task_vib = sio.start_background_task(sensor_loop_vib)
+    sensor_task_temp = sio.start_background_task(sensor_loop_temp)
 
-        main_loop.run_until_complete(socket_server.serve())
-        main_loop.run_until_complete(sensor_task_vib)
-        main_loop.run_until_complete(sensor_task_temp)
-
-    except Exception as e:
-        print(e)
+    main_loop.run_until_complete(socket_server.serve())
+    main_loop.run_until_complete(sensor_task_vib)
+    main_loop.run_until_complete(sensor_task_temp)

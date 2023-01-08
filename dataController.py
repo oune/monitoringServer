@@ -3,24 +3,28 @@ from clock import TimeController
 from db import Database
 from csvwriter import CsvWriter
 from scipy import signal
+from normalization import Normalization
 
 
 class ModelMachine:
     def __init__(self, name: str,
+                 norm: Normalization,
                  callback: Callable[[List[float], List[float], List[float], str], Awaitable[None]],
-                 batch_size: int = 10):
+                 batch_size: int = 10, ):
         self.vib_left = []
         self.vib_right = []
         self.temp = []
         self.batch_size = batch_size
         self.callback = callback
         self.name = name
+        self.norm = norm
 
     async def trigger(self):
         if self.is_batch():
-            await self.callback(self.vib_left[:self.batch_size], self.vib_right[:self.batch_size],
-                                self.temp[:self.batch_size], self.name)
-
+            left, right, temp = await self.norm.norm(self.vib_left[:self.batch_size],
+                                                     self.vib_right[:self.batch_size],
+                                                     self.temp[:self.batch_size])
+            await self.callback(left, right, temp, self.name)
             self.clear_batch()
 
     def is_batch(self):
@@ -100,13 +104,14 @@ class Statistics:
 
 
 class DataController:
-    def __init__(self, model_req: Callable[[List[float], List[float], List[float]], Awaitable[None]], batch_size,
+    def __init__(self, model_req: Callable[[List[float], List[float], List[float]], Awaitable[None]],
+                 norm: Normalization, batch_size,
                  sampling_rate: int, db_1_path, db_2_path, raw_directory):
         db1 = Database(db_1_path)
         db2 = Database(db_2_path)
 
-        self.machine1 = ModelMachine('machine1', model_req, batch_size)
-        self.machine2 = ModelMachine('machine2', model_req, batch_size)
+        self.machine1 = ModelMachine('machine1', norm, model_req, batch_size)
+        self.machine2 = ModelMachine('machine2', norm, model_req, batch_size)
         self.machine1_stat = StatMachine('machine1', db1)
         self.machine2_stat = StatMachine('machine2', db2)
         self.vib_writer = CsvWriter(raw_directory, 'vib',
