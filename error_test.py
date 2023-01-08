@@ -11,7 +11,7 @@ import pickle
 class ErrorData():
     
     def __init__(self):
-        self.df = pd.read_csv('error_data.csv')
+        self.df = pd.read_csv('resource/error_data.csv')
 
         mean_df = self.df.mean()
         std_df = self.df.std()
